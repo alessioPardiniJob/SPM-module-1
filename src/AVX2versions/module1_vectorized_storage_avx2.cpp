@@ -2,7 +2,7 @@
 #include <immintrin.h>
 
 // ====================================================================
-// STEP 2: Float-Domain Bypass e Packing Vettoriale (Cache Polluting)
+// STEP 2: Float-Domain Bypass and Vector Packing (Cache Polluting)
 // ====================================================================
 void compute_partitions(const uint64_t* __restrict__ p_pKeys, 
                         uint16_t* __restrict__ p_pPart_id, 
@@ -14,12 +14,12 @@ void compute_partitions(const uint64_t* __restrict__ p_pKeys,
 
     __m256i v_mask = _mm256_set1_epi32(l_uMask);
     
-    // Processiamo 16 chiavi alla volta
+    // Process 16 keys at a time
     size_t l_stLimit = p_stN & ~15ULL; 
 
     for (; l_stI < l_stLimit; l_stI += 16) {
         
-        // 1. Caricamento di 16 chiavi (4 registri YMM)
+        // 1. Load 16 keys (4 YMM registers)
         __m256i k1 = _mm256_loadu_si256((const __m256i*)&p_pKeys[l_stI + 0]);
         __m256i k2 = _mm256_loadu_si256((const __m256i*)&p_pKeys[l_stI + 4]);
         __m256i k3 = _mm256_loadu_si256((const __m256i*)&p_pKeys[l_stI + 8]);
@@ -31,7 +31,7 @@ void compute_partitions(const uint64_t* __restrict__ p_pKeys,
         __m256i x3 = _mm256_xor_si256(k3, _mm256_srli_epi64(k3, 32));
         __m256i x4 = _mm256_xor_si256(k4, _mm256_srli_epi64(k4, 32));
 
-        // 3. Float-Domain Bypass per lo shuffling dei blocchi a 32-bit
+        // 3. Float-Domain Bypass for 32-bit block shuffling
         __m256i p1_mixed = _mm256_castps_si256(
             _mm256_shuffle_ps(_mm256_castsi256_ps(x1), _mm256_castsi256_ps(x2), _MM_SHUFFLE(2, 0, 2, 0))
         );
@@ -39,25 +39,25 @@ void compute_partitions(const uint64_t* __restrict__ p_pKeys,
             _mm256_shuffle_ps(_mm256_castsi256_ps(x3), _mm256_castsi256_ps(x4), _MM_SHUFFLE(2, 0, 2, 0))
         );
 
-        // Allineamento intra-lane
+        // Intra-lane alignment
         __m256i p1 = _mm256_permute4x64_epi64(p1_mixed, 0xD8);
         __m256i p2 = _mm256_permute4x64_epi64(p2_mixed, 0xD8);
 
-        // Applichiamo la maschera delle partizioni
+        // Apply partition mask
         p1 = _mm256_and_si256(p1, v_mask);
         p2 = _mm256_and_si256(p2, v_mask);
 
-        // 4. Compressione a 16-bit
+        // 4. Compress to 16-bit
         __m256i packed_16 = _mm256_packus_epi32(p1, p2);
         
-        // CORREZIONE DELL'ORDINE (Risolve il problema delle corsie a 128-bit)
+        // ORDER CORRECTION (Fixes 128-bit lane ordering issues)
         packed_16 = _mm256_permute4x64_epi64(packed_16, 0xD8);
 
-        // 5. Scrittura Vettoriale Standard (Causa Cache Pollution!)
+        // 5. Standard Vector Store (Causes Cache Pollution!)
         _mm256_storeu_si256((__m256i*)&p_pPart_id[l_stI], packed_16);
     }
 
-    // Epilogo per elementi residui
+    // Epilogue for remaining elements
     for (; l_stI < p_stN; ++l_stI) {
         uint64_t l_uK = p_pKeys[l_stI];
         p_pPart_id[l_stI] = static_cast<uint16_t>((l_uK ^ (l_uK >> 32))) & l_uMask;

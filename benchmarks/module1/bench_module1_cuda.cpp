@@ -1,5 +1,5 @@
-// Blindiamo il file di test: NIENTE vettorizzazione qui dentro.
-// Vogliamo misurare solo il kernel, non il codice di contorno.
+// Locking the test file: NO vectorization here.
+// We only want to measure the kernel, not the surrounding code.
 #ifndef __CUDACC__
     #pragma GCC optimize("O3,no-tree-vectorize")
 #endif
@@ -35,14 +35,14 @@
 
 using namespace std;
 
-// Supporto per la mediana
+// Support for median
 double get_median(vector<double>& v) {
     sort(v.begin(), v.end());
     size_t n = v.size();
     return (v[n/2 - 1] + v[n/2]) / 2.0;
 }
 
-// Supporto per la Deviazione Standard
+// Support for Standard Deviation
 double get_std_dev(const vector<double>& v) {
     double sum = accumulate(v.begin(), v.end(), 0.0);
     double mean = sum / v.size();
@@ -66,10 +66,10 @@ int main(int argc, char** argv) {
     vector<no_init_t<uint16_t>> l_vPart_id;
 
     cout << "========================================================\n";
-    cout << "           ESECUZIONE BENCHMARK CUDA (N = 100M)         \n";
+    cout << "           CUDA BENCHMARK EXECUTION (N = 100M)         \n";
     cout << "========================================================\n";
 
-    cout << "[*] Generazione chiavi e allocazione memoria in corso...\n";
+    cout << "[*] Generating keys and allocating memory...\n";
     l_vKeys = generate_keys(l_stN, l_uSeed, UINT64_MAX); 
     l_vPart_id.resize(l_stN);
     std::fill(l_vPart_id.begin(), l_vPart_id.end(), 0);
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     float dummy_h2d, dummy_kernel, dummy_d2h;
     compute_partitions_cuda(l_vKeys.data(), (uint16_t*)l_vPart_id.data(), 1000, l_uP, dummy_h2d, dummy_kernel, dummy_d2h);
 
-    cout << "[*] Esecuzione su GPU in corso (" << l_iRUNS << " run)...\n";
+    cout << "[*] Running GPU benchmark (" << l_iRUNS << " runs)...\n";
     
     for (int l_i = 0; l_i < l_iRUNS; ++l_i) {
         float t_h2d = 0.0f, t_kernel = 0.0f, t_d2h = 0.0f;
@@ -94,19 +94,19 @@ int main(int argc, char** argv) {
         l_vdTimes_D2H[l_i]    = t_d2h;
         l_vdTimes_Total[l_i]  = elapsed_total_ms;
         
-        // Stampa di progresso pulita (opzionale ma bella da vedere)
+        // Clean progress output
         cout << "   Run " << setw(2) << l_i + 1 << " | Kernel: " 
              << fixed << setprecision(3) << setw(6) << t_kernel << " ms | Total E2E: " 
              << setw(6) << elapsed_total_ms << " ms\n";
     }
 
-    // Calcolo Mediane
+    // Median calculation
     double med_h2d    = get_median(l_vdTimes_H2D);
     double med_kernel = get_median(l_vdTimes_Kernel);
     double med_d2h    = get_median(l_vdTimes_D2H);
     double med_total  = get_median(l_vdTimes_Total);
 
-    // Calcolo Deviazioni Standard
+    // Standard Deviation calculation
     double std_h2d    = get_std_dev(l_vdTimes_H2D);
     double std_kernel = get_std_dev(l_vdTimes_Kernel);
     double std_d2h    = get_std_dev(l_vdTimes_D2H);
@@ -115,24 +115,23 @@ int main(int argc, char** argv) {
     double tput_kernel = (l_stN / (med_kernel / 1000.0)) / 1000000.0;
     double tput_total  = (l_stN / (med_total / 1000.0))  / 1000000.0;
 
-    cout << "\n=> BREAKDOWN DEI TEMPI (Mediana su " << l_iRUNS << " run):\n";
+    cout << "\n=> TIME BREAKDOWN (Median over " << l_iRUNS << " runs):\n";
     cout << "   - Host-to-Device (PCIe) : " << fixed << setprecision(2) << med_h2d << " ms (Std Dev: " << std_h2d << " ms)\n";
     cout << "   - Kernel Execution (GPU): " << med_kernel << " ms (Std Dev: " << std_kernel << " ms)\n";
     cout << "   - Device-to-Host (PCIe) : " << med_d2h << " ms (Std Dev: " << std_d2h << " ms)\n";
     cout << "   - Total End-to-End      : " << med_total << " ms (Std Dev: " << std_total << " ms)\n";
     cout << "--------------------------------------------------------\n";
     cout << "=> THROUGHPUT:\n";
-    cout << "   - Puro Kernel GPU       : " << tput_kernel << " Mkeys/s\n";
-    cout << "   - Totale End-to-End     : " << tput_total << " Mkeys/s\n";
+    cout << "   - Pure GPU Kernel       : " << tput_kernel << " Mkeys/s\n";
+    cout << "   - Total End-to-End      : " << tput_total << " Mkeys/s\n";
     cout << "========================================================\n";
 
     l_uDummy = ((uint16_t*)l_vPart_id.data())[l_stN / 2]; 
     (void)l_uDummy;
 
-    cout << "[*] Calcolo checksum per verifica...\n";
-    uint64_t final_checksum = calculate_checksum((uint16_t*)l_vPart_id.data(), l_stN);
-    cout << "=> CHECKSUM: 0x" << hex << final_checksum << dec << "\n";
+    // CORRECTNESS VERIFICATION
+    // This calls the template function verify_correctness<uint16_t>
+    verify_correctness(l_vKeys.data(), (uint16_t*)l_vPart_id.data(), l_stN, l_uP);    
     cout << "========================================================\n";
-
     return 0;
 }

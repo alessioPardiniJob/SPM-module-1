@@ -2,31 +2,30 @@
 #include <random>
 #include <array>
 #include <iostream>  
+#include <cstdint>
+#include <vector>
+#include <iomanip>
+#include <cstddef>
 #ifndef __CUDACC__
     #pragma GCC optimize("O3,no-tree-vectorize")
 #endif
 
 
 std::vector<uint64_t> generate_keys(size_t N, uint64_t seed, uint64_t key_space_size) {
-    // 1. Prepariamo una sequenza di seed a 32-bit per inizializzare uniformemente 
-    // lo stato interno del generatore.
+
     std::array<uint32_t, 2> seed_data = { 
         static_cast<uint32_t>(seed), 
         static_cast<uint32_t>(seed >> 32) 
     }; 
     std::seed_seq seq(seed_data.begin(), seed_data.end());
     
-    // 2. Inizializzazione del generatore Mersenne Twister a 64 bit
     std::mt19937_64 generator(seq);
     
-    // 3. Distribuzione uniforme nell'intervallo [0, key_space_size - 1]
     std::uniform_int_distribution<uint64_t> distribution(0, key_space_size - 1);
     
-    // 4. Allocazione preventiva della memoria 
     std::vector<uint64_t> keys;
     keys.reserve(N);
     
-    // 5. Popolamento dell'array
     for (size_t i = 0; i < N; ++i) {
         keys.push_back(distribution(generator));
     }
@@ -34,11 +33,7 @@ std::vector<uint64_t> generate_keys(size_t N, uint64_t seed, uint64_t key_space_
     return keys;
 }
 
-#include <iostream>
-#include <cstdint>
-#include <vector>
-#include <iomanip>
-#include <cstddef>
+
 
 /**
  * Generic calculation of position-dependent checksum.

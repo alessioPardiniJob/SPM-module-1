@@ -138,7 +138,7 @@ $(BIN_DIR)/mod1_cuda: $(MOD1_BENCH)/bench_module1_cuda.cpp $(MOD1_SRC)/module1_c
 # ======================================================================
 # REGOLE DI COMPILAZIONE - Sweep P
 # ======================================================================
-$(BIN_DIR)/mod1_sweepP: $(MOD1_BENCH)/bench_sweepP.cpp $(MOD1_SRC)/module1_avx2.cpp  $(MOD1_SRC)/module1_cuda.cu $(UTILS_SRC)
+$(BIN_DIR)/mod1_sweepP: $(MOD1_BENCH)/bench_sweepP.cpp $(MOD1_SRC)/AVX2versions/module1_vectorized_streamingPrefetch64_avx2.cpp  $(MOD1_SRC)/module1_cuda.cu $(UTILS_SRC)
 	$(NVCC) $(NVCCFLAGS) -Xcompiler "-mavx2" -o $@ $^
 
 
