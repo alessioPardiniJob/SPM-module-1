@@ -23,7 +23,6 @@ This module implements and optimizes the **mapping phase** of a *Partitioned Has
 │   ├── module1_plain_16.cpp
 │   ├── module1_plain_32.cpp
 │   ├── module1_plain_64.cpp
-│   ├── module1_avx2.cpp
 │   ├── module1_cuda.cu
 │   └── utils.cpp
 ├── benchmarks/
@@ -84,79 +83,49 @@ Output to check: summary table reporting algorithm runtimes.
 ### Scalar baseline
 
 ```bash
-make mod1_baseline_16
-make mod1_baseline_32
+srun -p gpu-shared -w node09 --time=00:00:30 make mod1_baseline_16
+srun -p gpu-shared -w node09 --time=00:00:30 make mod1_baseline_32
+```7
+
+
+### Compilation Flags
+
+```bash
+g++ -std=c++17 -Wall -I./utils -O3 -fno-tree-vectorize -o bin/mod1_baseline_16 benchmarks/module1/bench_module1_16.cpp src/module1_plain_16.cpp src/utils.cpp
+
+g++ -std=c++17 -Wall -I./utils -O3 -fno-tree-vectorize -o bin/mod1_baseline_32 benchmarks/module1/bench_module1_32.cpp src/module1_plain_32.cpp src/utils.cpp
 ```
+
+- `-fno-tree-vectorize` → disables vectorization to isolate pure algorithmic cost (no SIMD)
 
 ### Auto-vectorized versions
 
 ```bash
-make mod1_autovec_16
-make mod1_autovec_32
+srun -p gpu-shared -w node09 --time=00:00:30 make mod1_autovec_16
+srun -p gpu-shared -w node09 --time=00:00:30 make mod1_autovec_32
 ```
-
----
 
 ### Compilation Flags
 
-#### Scalar
-
 ```bash
--O3 -fno-tree-vectorize
+g++ -std=c++17 -Wall -I./utils -O3 -ftree-vectorize -mavx2 -fopt-info-vec-all=vec_report.txt -o bin/mod1_autovec_16 benchmarks/module1/bench_module1_16.cpp src/module1_plain_16.cpp src/utils.cpp
+
+g++ -std=c++17 -Wall -I./utils -O3 -ftree-vectorize -mavx2 -fopt-info-vec-all=vec_report.txt -o bin/mod1_autovec_32 benchmarks/module1/bench_module1_32.cpp src/module1_plain_32.cpp src/utils.cpp
 ```
 
-#### Auto-vectorized
-
-```bash
--O3 -ftree-vectorize -mavx2 -fopt-info-vec-all=vec_report.txt
-```
-
----
-
-### Flag Explanation
-
-#### `-ftree-vectorize`
-
-* Enables GCC loop vectorizer
-* Converts scalar loops into SIMD operations
-* Depends on:
-
-  * dependency analysis
-  * internal cost model
-
-#### `-mavx2`
-
-* Targets AVX2 ISA (256-bit SIMD)
-* Enables:
-
-  * YMM registers
-  * operations on 8×32-bit or 16×16-bit lanes
-
-#### `-fopt-info-vec-all=vec_report.txt`
-
-* Generates a detailed vectorization report:
-
-  * which loops were vectorized
-  * which were not
-  * reasons (dependencies, cost, alignment)
-
----
-
-### Key Insight
-
-* 16-bit reduces memory footprint
-* However, narrowing (32→16) introduces expensive shuffle operations
-* Leads to **Vectorization Paradox**: less memory ≠ better performance
-
+- `-O3` → aggressive compiler optimizations
+- `-ftree-vectorize` → enables auto-vectorization
+- `-mavx2` → use AVX2 SIMD instructions
+- `-fopt-info-vec-all=vec_report.txt` → generates detailed vectorization report
 ---
 
 ## HOW TO EXECUTE
 
 ```bash
-./bin/mod1_baseline_16
-./bin/mod1_baseline_32
-./bin/mod1_autovec_16
-./bin/mod1_autovec_32
+srun -p gpu-excl -w node09 --time=00:00:30 ./bin/mod1_baseline_16
+srun -p gpu-excl -w node09 --time=00:00:30 ./bin/mod1_baseline_32
+srun -p gpu-shared -w node09 --time=00:00:30 make mod1_autovec_16
+srun -p gpu-shared -w node09 --time=00:00:30 make mod1_autovec_32
 ```
 
 ---
