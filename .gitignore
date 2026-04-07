@@ -1,0 +1,13 @@
+# Build artifacts
+bin/
+*.o
+*.out
+
+# Profiling / analysis
+cachegrind.out.*
+vec_report*.txt
+assembly_report.txt
+
+# Editor / system
+.DS_Store
+*.swp
