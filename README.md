@@ -3,13 +3,9 @@
 
 ## Overview
 
-This module implements and optimizes the **mapping phase** of a *Partitioned Hash Join*, a workload characterized by:
+This module implements and optimizes the **mapping phase** of a *Partitioned Hash Join*.
 
-- **Low computational intensity**
-- **High memory pressure (memory-bound)**
-- Throughput limited by **DRAM bandwidth**
-
-The project explores multiple optimization strategies:
+## Repository Structure
 
 ```
 
@@ -17,16 +13,32 @@ The project explores multiple optimization strategies:
 ├── Makefile
 ├── src/
 │   ├── AVX2versions/
+│   │   ├── module1_naive_version_avx2.cpp
+│   │   ├── module1_vectorized_storage_avx2.cpp
+│   │   ├── module1_vectorized_streamingPrefetch16_avx2.cpp
+│   │   ├── module1_vectorized_streamingPrefetch32_avx2.cpp
+│   │   ├── module1_vectorized_streamingPrefetch64_avx2.cpp
+│   │   ├── module1_vectorized_streamingPrefetch128_avx2.cpp
+│   │   ├── module1_vectorized_streamingStore_avx2.cpp
 │   ├── module1_plain_16.cpp
 │   ├── module1_plain_32.cpp
 │   ├── module1_plain_64.cpp
 │   ├── module1_avx2.cpp
 │   ├── module1_cuda.cu
 │   └── utils.cpp
-├── benchmarks/module1/
+├── benchmarks/
+│   ├── module1/
+│   │   ├── bench_algorithms.cpp
+│   │   ├── bench_module1_16.cpp
+│   │   ├── bench_module1_32.cpp
+│   │   ├── bench_module1_64.cpp
+│   │   ├── bench_module1_cuda.cpp
+│   │   ├── bench_sweepP.cpp
 ├── utils/
+│   ├── hpc_helpers.hpp
+│   ├── module1.h
+│   ├── utils.h
 ├── bin/
-├── assembly_report.txt
 ├── vec_report.txt
 
 ````
