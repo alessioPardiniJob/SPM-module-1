@@ -68,11 +68,7 @@ mod1_sweepP: directories $(BIN_DIR)/mod1_sweepP
 directories:
 	@mkdir -p $(BIN_DIR)
 
-# ======================================================================
-# REGOLE DI COMPILAZIONE - module 1
-# ======================================================================
 
-# 0. Laboratorio Algoritmi
 $(BIN_DIR)/mod1_algorithms: $(MOD1_BENCH)/bench_algorithms.cpp $(UTILS_SRC)
 	$(CXX) $(CXXFLAGS) $(OPTFLAGS) -fno-tree-vectorize -o $@ $^
 
@@ -82,25 +78,17 @@ $(BIN_DIR)/mod1_baseline_64: $(MOD1_BENCH)/bench_module1_64.cpp $(MOD1_SRC)/modu
 $(BIN_DIR)/mod1_autovec_64: $(MOD1_BENCH)/bench_module1_64.cpp $(MOD1_SRC)/module1_plain_64.cpp $(UTILS_SRC)
 	$(CXX) $(CXXFLAGS) $(OPTFLAGS) -ftree-vectorize -mavx2 $(VECREPORT) -o $@ $^
 
-# 1. Baseline Scalare 32-bit
 $(BIN_DIR)/mod1_baseline_32: $(MOD1_BENCH)/bench_module1_32.cpp $(MOD1_SRC)/module1_plain_32.cpp $(UTILS_SRC)
 	$(CXX) $(CXXFLAGS) $(OPTFLAGS) -fno-tree-vectorize -o $@ $^
 
-# 2. Auto-Vettorizzazione GCC 32-bit
 $(BIN_DIR)/mod1_autovec_32: $(MOD1_BENCH)/bench_module1_32.cpp $(MOD1_SRC)/module1_plain_32.cpp $(UTILS_SRC)
 	$(CXX) $(CXXFLAGS) $(OPTFLAGS) -ftree-vectorize -mavx2 $(VECREPORT) -o $@ $^
 
-# 1. Baseline Scalare 16-bit
 $(BIN_DIR)/mod1_baseline_16: $(MOD1_BENCH)/bench_module1_16.cpp $(MOD1_SRC)/module1_plain_16.cpp $(UTILS_SRC)
 	$(CXX) $(CXXFLAGS) $(OPTFLAGS) -fno-tree-vectorize -o $@ $^
 
-# 2. Auto-Vettorizzazione GCC 16-bit
 $(BIN_DIR)/mod1_autovec_16: $(MOD1_BENCH)/bench_module1_16.cpp $(MOD1_SRC)/module1_plain_16.cpp $(UTILS_SRC)
 	$(CXX) $(CXXFLAGS) $(OPTFLAGS) -ftree-vectorize -mavx2 $(VECREPORT) -o $@ $^
-
-
-
-
 
 
 $(BIN_DIR)/mod1_naive_avx2: $(MOD1_BENCH)/bench_module1_16.cpp $(MOD1_SRC)/AVX2versions/module1_naive_version_avx2.cpp $(UTILS_SRC)
@@ -124,20 +112,9 @@ $(BIN_DIR)/mod1_vectorized_streamingPrefetch64_avx2: $(MOD1_BENCH)/bench_module1
 $(BIN_DIR)/mod1_vectorized_streamingPrefetch128_avx2: $(MOD1_BENCH)/bench_module1_16.cpp $(MOD1_SRC)/AVX2versions/module1_vectorized_streamingPrefetch128_avx2.cpp $(UTILS_SRC)
 	$(CXX) $(CXXFLAGS) $(OPTFLAGS) -fno-tree-vectorize -mavx2 $(VECREPORT) -o $@ $^
 
-
-# ======================================================================
-# REGOLE DI COMPILAZIONE - CUDA
-# ======================================================================
-
-# Regola per compilare il codice CUDA usando nvcc (Separate Compilation or Single Pass)
-# Assumendo che tu scriva un bench_module1_cuda.cpp e un module1_cuda.cu
 $(BIN_DIR)/mod1_cuda: $(MOD1_BENCH)/bench_module1_cuda.cpp $(MOD1_SRC)/module1_cuda.cu $(UTILS_SRC)
 	$(NVCC) $(NVCCFLAGS) -o $@ $^
 
-
-# ======================================================================
-# REGOLE DI COMPILAZIONE - Sweep P
-# ======================================================================
 $(BIN_DIR)/mod1_sweepP: $(MOD1_BENCH)/bench_sweepP.cpp $(MOD1_SRC)/AVX2versions/module1_vectorized_streamingPrefetch64_avx2.cpp  $(MOD1_SRC)/module1_cuda.cu $(UTILS_SRC)
 	$(NVCC) $(NVCCFLAGS) -Xcompiler "-mavx2" -o $@ $^
 

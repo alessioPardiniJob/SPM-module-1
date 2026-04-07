@@ -2,9 +2,7 @@
 #include <cstdint>
 #include <cstddef>
 
-// ==========================================
-// 1. Modulo (Baseline lenta)
-// ==========================================
+
 inline void kernel_modulo(const uint64_t* __restrict__ p_pKeys, uint32_t* __restrict__ p_pPart_id, size_t p_stN, uint32_t p_uP, uint32_t p_uShift_val) {
     size_t l_stI;
     for (l_stI = 0; l_stI < p_stN; ++l_stI) {
@@ -12,9 +10,7 @@ inline void kernel_modulo(const uint64_t* __restrict__ p_pKeys, uint32_t* __rest
     }
 }
 
-// ==========================================
-// 2. Maschera di Bit Pura 
-// ==========================================
+
 inline void kernel_bitmask(const uint64_t* __restrict__ p_pKeys, uint32_t* __restrict__ p_pPart_id, size_t p_stN, uint32_t p_uP, uint32_t p_uShift_val) {
     size_t l_stI;
     uint32_t l_uMask = p_uP - 1;
@@ -23,9 +19,6 @@ inline void kernel_bitmask(const uint64_t* __restrict__ p_pKeys, uint32_t* __res
     }
 }
 
-// ==========================================
-// 3. Shift + XOR 
-// ==========================================
 inline void kernel_shift_xor(const uint64_t* __restrict__ p_pKeys, uint32_t* __restrict__ p_pPart_id, size_t p_stN, uint32_t p_uP, uint32_t p_uShift_val) {
     size_t l_stI;
     uint32_t l_uMask = p_uP - 1;
@@ -36,9 +29,6 @@ inline void kernel_shift_xor(const uint64_t* __restrict__ p_pKeys, uint32_t* __r
     }
 }
 
-// ==========================================
-// 4. Fibonacci / Multiplicative (La migliore distribuzione)
-// ==========================================
 inline void kernel_fibonacci(const uint64_t* __restrict__ p_pKeys, uint32_t* __restrict__ p_pPart_id, size_t p_stN, uint32_t p_uP, uint32_t p_uShift_val) {
     size_t l_stI;
     const uint64_t l_uMagic = 11400714819323198485ULL;
