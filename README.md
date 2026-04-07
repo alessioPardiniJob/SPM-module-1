@@ -38,33 +38,19 @@ The project explores multiple optimization strategies:
 ## HOW TO COMPILE
 
 ```bash
-make mod1_algorithms
+srun -p gpu-shared -w node09 --time=00:00:30 make mod1_algorithms
 ````
 
 ### Compilation Flags
 
 ```bash
--O3 -fno-tree-vectorize
-```
-
-#### `-O3`
-
-* Enables aggressive optimizations:
-
-  * loop unrolling
-  * inlining
-  * strength reduction
-* Improves Instruction-Level Parallelism (ILP)
-* Provides a realistic optimized scalar baseline
+g++ -std=c++17 -Wall -I./utils -O3 -fno-tree-vectorize -o bin/mod1_algorithms benchmarks/module1/bench_algorithms.cpp src/utils.cpp```
 
 #### `-fno-tree-vectorize`
 
-* Disables GCC auto-vectorization
-* Guarantees purely scalar execution
-* Prevents compiler-generated SIMD transformations
-
 👉 Goal: isolate pure algorithmic cost without SIMD interference
 
+Output to check: summary table reporting algorithm runtimes.
 ---
 
 ## HOW TO EXECUTE
