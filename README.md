@@ -11,18 +11,6 @@ This module implements and optimizes the **mapping phase** of a *Partitioned Has
 
 The project explores multiple optimization strategies:
 
-- Scalar baseline
-- Compiler auto-vectorization (GCC)
-- Manual SIMD (AVX2 intrinsics)
-- Memory hierarchy optimizations (streaming stores, prefetching)
-- GPU offloading (CUDA)
-
-All experiments are executed on **N = 50M keys**.
-
----
-
-## Repository Structure
-
 ```
 
 .
