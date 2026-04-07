@@ -124,8 +124,8 @@ g++ -std=c++17 -Wall -I./utils -O3 -ftree-vectorize -mavx2 -fopt-info-vec-all=ve
 ```bash
 srun -p gpu-excl -w node09 --time=00:00:30 ./bin/mod1_baseline_16
 srun -p gpu-excl -w node09 --time=00:00:30 ./bin/mod1_baseline_32
-srun -p gpu-shared -w node09 --time=00:00:30 make mod1_autovec_16
-srun -p gpu-shared -w node09 --time=00:00:30 make mod1_autovec_32
+srun -p gpu-shared -w node09 --time=00:00:30 ./bin/mod1_autovec_16
+srun -p gpu-shared -w node09 --time=00:00:30 ./bin/mod1_autovec_32
 ```
 ### Output
 
