@@ -103,7 +103,7 @@ g++ -std=c++17 -Wall -I./utils -O3 -fno-tree-vectorize -o bin/mod1_baseline_32 b
 ```bash
 srun -p gpu-shared -w node09 --time=00:00:30 make mod1_autovec_16
 srun -p gpu-shared -w node09 --time=00:00:30 make mod1_autovec_32
-```
+```7
 
 ### Compilation Flags
 
