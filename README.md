@@ -44,25 +44,24 @@ srun -p gpu-shared -w node09 --time=00:00:30 make mod1_algorithms
 ### Compilation Flags
 
 ```bash
-g++ -std=c++17 -Wall -I./utils -O3 -fno-tree-vectorize -o bin/mod1_algorithms benchmarks/module1/bench_algorithms.cpp src/utils.cpp```
+g++ -std=c++17 -Wall -I./utils -O3 -fno-tree-vectorize -o bin/mod1_algorithms benchmarks/module1/bench_algorithms.cpp src/utils.cpp
+```
 
 #### `-fno-tree-vectorize`
 
 👉 Goal: isolate pure algorithmic cost without SIMD interference
 
-Output to check: summary table reporting algorithm runtimes.
 ---
 
 ## HOW TO EXECUTE
 
 ```bash
-./bin/mod1_algorithms
+srun -p gpu-excl -w node09 --time=00:01:00  ./bin/mod1_algorithms
 ```
 
 ### Output
 
-* Throughput (Mkeys/s)
-* Latency (ms)
+Output to check: summary table reporting algorithm runtimes.
 
 ---
 
